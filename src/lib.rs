@@ -39,7 +39,6 @@ macro_rules! arr {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::assert_relative_eq;
     use rstest::fixture;
     use rstest::rstest;
 
@@ -66,6 +65,13 @@ mod tests {
     #[rstest]
     fn test_nums_incremented(nums: [i32; 5], nums_plus_one: [i32; 5]) {
         assert_eq!(arr![x + 1, for x in nums; len 5], nums_plus_one);
+    }
+    #[rstest]
+    fn test_nums_with_fn(nums: [i32; 5]) {
+        assert_eq!(
+            vec![arr![x.abs(), for x in nums; len 5]],
+            vec![nums.map(|x| x.abs())]
+        );
     }
 
     #[rstest]
@@ -99,14 +105,14 @@ mod tests {
     #[rstest]
     fn test_pairs_zipped_product(nums_plus_one: [i32; 5], pairs: [(i32, f64); 5]) {
         assert_eq!(
-            arr![(x * z) as f64, for ((x, y), z) in pairs.into_iter().zip(nums_plus_one); len 5],
+            arr![(x * z) as f64, for ((x, _), z) in pairs.into_iter().zip(nums_plus_one); len 5],
             arr![y, for (_, y) in pairs; len 5]
         );
     }
 
     #[rstest]
     #[should_panic]
-    fn test_placeholder(nums: [i32; 5]) {
+    fn test_placeholder(_nums: [i32; 5]) {
         arr![_, for _ in nums; len 5];
     }
 }
