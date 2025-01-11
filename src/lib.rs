@@ -67,6 +67,7 @@ mod tests {
     fn test_nums_identity(nums: [i32; 5]) {
         assert_eq!(arr![x, for x in nums; len 5], nums);
     }
+
     #[rstest]
     fn test_nums_statement(nums: [i32; 5]) {
         assert_eq!(arr![{let _ = x + 1;}, for x in nums; len 5], [(); 5]);
@@ -89,13 +90,15 @@ mod tests {
     fn test_nums_constant_value(nums: [i32; 5]) {
         assert_eq!(arr![12.3, for _ in nums; len 5], [12.3; 5]);
     }
-    
+
     #[rstest]
     fn test_conditional_expressions(nums: [i32; 5]) {
-        assert_eq!(vec![arr![if x > 0 { 1 } else { 0 }, for x in nums; len 5]],
-            vec![nums.map(|x| if x > 0 {1} else {0} )]);
+        assert_eq!(
+            vec![arr![if x > 0 { 1 } else { 0 }, for x in nums; len 5]],
+            vec![nums.map(|x| if x > 0 { 1 } else { 0 })]
+        );
     }
-    
+
     #[rstest]
     fn test_pairs_first_element(pairs: [(i32, f64); 5]) {
         assert_eq!(arr![x, for (x, _) in pairs; len 5], [0, 99, -2, 5, 9]);
@@ -134,6 +137,7 @@ mod tests {
             vec![pairs.map(|(x, y)| (y * 2.0, x + 10))]
         );
     }
+
     #[rstest]
     fn test_pairs_to_arr(pairs: [(i32, f64); 5]) {
         let other_variable = 43;
@@ -188,23 +192,19 @@ mod tests {
     #[case::greater_than_5(|x: i32| x > 5)]
     #[case::is_negative(|x: i32| x < 0)]
     #[case::is_zero(|x: i32| x == 0)]
-    fn test_nums_constant_value_with_cond(
-        nums: [i32; 5],
-        #[case] cond: fn(i32) -> bool,
-        
-    ) {
+    fn test_nums_constant_value_with_cond(nums: [i32; 5], #[case] cond: fn(i32) -> bool) {
         assert_eq!(
             vec![arr![12.3, for x in nums, if cond(x); len 5]],
             vec![nums.map(|x| if cond(x) { Some(12.3) } else { None })]
         );
     }
-    
+
     #[rstest]
     #[case::is_odd(|x: i32| x % 2 == 1)]
     #[case::greater_than_5(|x: i32| x > 5)]
     #[case::is_negative(|x: i32| x < 0)]
     #[case::is_zero(|x: i32| x == 0)]
-    fn test_pairs_first_element_with_cond(pairs: [(i32, f64); 5], #[case] cond : fn(i32)->bool,) {
+    fn test_pairs_first_element_with_cond(pairs: [(i32, f64); 5], #[case] cond: fn(i32) -> bool) {
         assert_eq!(
             arr![x, for (x, _) in pairs, if cond(x); len 5],
             pairs.map(|(x, _)| if cond(x) { Some(x) } else { None })
@@ -214,13 +214,12 @@ mod tests {
     #[rstest]
     fn test_pairs_nested_with_cond(pairs: [(i32, f64); 5]) {
         assert_eq!(
-            vec![
-                arr![arr![y, for (_, _, y) in [(1, 33, x)]; len 1],
-                for (x, _) in pairs, if x % 2 == 0; len 5]
-            ],
+            vec![arr![arr![y, for (_, _, y) in [(1, 33, x)]; len 1],
+                for (x, _) in pairs, if x % 2 == 0; len 5]],
             vec![pairs.map(|p| if p.0 % 2 == 0 { Some([p.0]) } else { None })]
         );
     }
+
     #[rstest]
     fn test_pairs_nested_with_nested_cond(pairs: [(i32, f64); 5]) {
         assert_eq!(
@@ -228,7 +227,11 @@ mod tests {
                 arr![arr![y, for (_, _, y) in [(1, 33, x)], if y > 0; len 1],
                 for (x, _) in pairs, if x % 2 == 0; len 5]
             ],
-            vec![pairs.map(|p| if p.0 % 2 == 0 { Some([if p.0 > 0 {Some(p.0)} else {None}]) } else { None })]
+            vec![pairs.map(|p| if p.0 % 2 == 0 {
+                Some([if p.0 > 0 { Some(p.0) } else { None }])
+            } else {
+                None
+            })]
         );
     }
 
@@ -242,10 +245,7 @@ mod tests {
 
     #[rstest]
     fn test_pairs_constant_tuple_with_cond(pairs: [(i32, f64); 5]) {
-        assert_eq!(
-            arr![(), for _ in pairs, if true; len 5],
-            [Some(()); 5]
-        );
+        assert_eq!(arr![(), for _ in pairs, if true; len 5], [Some(()); 5]);
     }
 
     #[rstest]
@@ -259,10 +259,12 @@ mod tests {
     #[rstest]
     fn test_pairs_swapped_and_scaled_with_cond(pairs: [(i32, f64); 5]) {
         assert_eq!(
-            vec![
-                arr![(y * 2.0, x + 10), for (x, y) in pairs, if x as f64 + y > 10.0; len 5]
-            ],
-            vec![pairs.map(|(x, y)| if x as f64 + y > 10.0 { Some((y * 2.0, x + 10)) } else { None })]
+            vec![arr![(y * 2.0, x + 10), for (x, y) in pairs, if x as f64 + y > 10.0; len 5]],
+            vec![pairs.map(|(x, y)| if x as f64 + y > 10.0 {
+                Some((y * 2.0, x + 10))
+            } else {
+                None
+            })]
         );
     }
 
@@ -275,7 +277,11 @@ mod tests {
                 for (x, y) in pairs,
                 if x > y as i32; len 5
             ]],
-            vec![pairs.map(|(x, y)| if x > y as i32 { Some([x - other_variable, y as i32]) } else { None })]
+            vec![pairs.map(|(x, y)| if x > y as i32 {
+                Some([x - other_variable, y as i32])
+            } else {
+                None
+            })]
         );
     }
 
@@ -290,5 +296,4 @@ mod tests {
             arr![y, for (x, y) in pairs, if x as f64 > y + 1.0; len 5]
         );
     }
-
 }
