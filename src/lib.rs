@@ -148,12 +148,6 @@ macro_rules! arr {
         })
     }};
 
-    // Panic if no expression is provided - otherwise the iteration does nothing.
-    (_, for $x:pat in $input:expr $(, if $cond:expr)*; len $len:expr) => {{
-        let msg = &format!("Comprehension cannot start with a placeholder ``_``");
-        panic!("{}", msg);
-    }};
-
 }
 
 #[cfg(test)]
