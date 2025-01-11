@@ -1,7 +1,7 @@
 /*!
 A declarative macro for "list comprehension"-style syntax for creating Rust arrays.
 
-In constrast to most Rust packages of this sort, arrcomp exclusively creates fixed size
+In contrast to most Rust packages of this sort, arrcomp exclusively creates fixed size
 arrays without an intermediate heap allocation. This is more performant than standard
 Vector-based approaches, but places a few additional restrictions on the allowed syntax.
 
