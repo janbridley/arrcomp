@@ -24,7 +24,7 @@ modifying fixed-size arrays. `Option` types allow the use of filters even in cas
 the number of unfiltered outputs is unknown at compile time -- without any dynamic
 allocations!
 
-The `arr!` pattern is generally expressed as `f(x), for x in interable, if condition; len N`,
+The `arr!` pattern is generally expressed as `f(x), for x in iterable, if condition; len N`,
 where `f(x)` and `iterable` are any [statement](https://doc.rust-lang.org/reference/statements.html),
 `condition` is any statement that evaluates to a `bool`, and and `x` is any [pattern](https://doc.rust-lang.org/reference/patterns.html). Unlike Python, we must also provide a const `N` matching
 the length of the provided iterable in order to ensure the output can be sized at compile time.
@@ -75,12 +75,12 @@ assert_eq!(arr_without_allocation.to_vec(), iter_copy.collect::<Vec<_>>());
 # }
 ```
 
-The default syntax is a little clunky, and the inputs to `std::array::from_fn` are
+The default Rust syntax is a little clunky, and the inputs to `std::array::from_fn` are
 limited. Furthermore, an additional variable must be created outside the function call,
 as cloning the iterator inside `from_fn` resets the iterator to the beginning.
 
-An array comprehension provides an attractive to this pattern, with a simplified syntax
-that allows for arbitrary expressions for our input iterable.
+An array comprehension provides an attractive alternative to this pattern, with a
+simplified syntax that allows for arbitrary expressions for our input iterable.
 
 ```rust
 # use arrcomp::arr;
@@ -95,6 +95,13 @@ assert_eq!(arr_comprehension.to_vec(), incremented_vec.collect::<Vec<_>>());
 
 */
 
+/**
+The `arr!` macro has two branches - one for filtered comprehensions and one for
+unfiltered. This distinction allows unfiltered comprehensions to return arrays of a base
+type rather `Option<type>`, simplifying cases where all values would be `Some`
+
+`arr![$ex, for $x in $input, if $cond0, if $cond1; len $len]`
+**/
 #[macro_export]
 macro_rules! arr {
     ($ex:stmt, for $x:pat in $input:expr $(, if $cond:expr)+; len $len:expr) => {{
@@ -109,6 +116,7 @@ macro_rules! arr {
             (true $(&& $cond)*).then(|| {$ex})
         })
     }};
+
 
     ($ex:stmt, for $x:pat in $input:expr; len $len:expr) => {{
         let mut iter = $input.into_iter();
