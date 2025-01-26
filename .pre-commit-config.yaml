@@ -1,0 +1,39 @@
+ci:
+  autoupdate_schedule: quarterly
+  autoupdate_branch: 'trunk'
+  autofix_prs: true
+
+default_language_version:
+  rust: 1.81.0
+
+repos:
+- repo: https://github.com/backplane/pre-commit-rust-hooks
+  rev: v1.1.0
+  hooks:
+  - id: fmt
+  - id: check
+  - id: clippy
+    args:
+      - --all-targets
+      - --all-features
+      - --
+      - -Dwarnings
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-json
+  - id: check-toml
+  - id: check-yaml
+  - id: check-case-conflict
+  - id: mixed-line-ending
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.4.0
+  hooks:
+  - id: codespell
+    args: ["--ignore-words-list=crate"]
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.7
+  hooks:
+    - id: actionlint
