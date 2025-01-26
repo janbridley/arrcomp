@@ -2,7 +2,22 @@
 name = "arrcomp"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+keywords = [
+  "macro",
+  "list-comprehension",
+  "comprehension"
+]
+description = "List comprehension syntax for creating compile-time arrays."
+repository = "https://github.com/janbridley/arrcomp"
+readme = "README.md"
+publish = true
 
+exclude = [
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    ".github/*"
+]
 [dependencies]
 
 [dev-dependencies]
