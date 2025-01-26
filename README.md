@@ -1,6 +1,6 @@
 <img src="src/ims/arrcomp_anim.svg" width="600">
 
-List comprehension-style syntax for creating Rust array using declarative macros.
+List comprehension-style syntax for creating Rust arrays using declarative macros.
 
 In contrast to most Rust packages of this sort, arrcomp exclusively creates fixed size
 arrays without an intermediate heap allocation. This is more performant than standard
