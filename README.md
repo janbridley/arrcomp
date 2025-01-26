@@ -50,7 +50,6 @@ an array. In performance-critical contexts this is undesirable. Fortunately, the
 another way:
 
 ```rust
-# use arrcomp::arr;
 let mut incremented_iter = (0..10)
     .into_iter()
     .map(|x| if x % 2 == 1 { Some(x+1) } else { None });
@@ -73,7 +72,6 @@ An array comprehension provides an attractive alternative to this pattern, with 
 simplified syntax that allows for arbitrary expressions for our input iterable.
 
 ```rust
-# use arrcomp::arr;
 let incremented_vec = (0..10).map(|x| if x % 2 == 1 { Some(x+1) } else { None });
 
 let arr_comprehension = arr![x+1, for x in 0..10, if x % 2 == 1; len 10];
