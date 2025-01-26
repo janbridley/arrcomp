@@ -1,5 +1,7 @@
+#![doc(html_logo_url = "https://github.com/janbridley/arrcomp/blob/main/src/ims/arrcomp.svg")]
+
 /*!
-A declarative macro for "list comprehension"-style syntax for creating Rust arrays.
+List comprehension-style syntax for creating Rust array using declarative macros.
 
 In contrast to most Rust packages of this sort, arrcomp exclusively creates fixed size
 arrays without an intermediate heap allocation. This is more performant than standard
