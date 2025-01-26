@@ -13,6 +13,11 @@ repository = "https://github.com/janbridley/arrcomp"
 readme = "README.md"
 publish = true
 
+exclude = [
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    ".github/*"
+]
 [dependencies]
 
 [dev-dependencies]
