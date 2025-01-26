@@ -1,27 +1,29 @@
 <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 377 81">
 
   <style>
-    @keyframes slideSteps {
-      0% { transform: translateX(-180px); }
-      5% { transform: translateX(-160px); }
-      8.5% { transform: translateX(-140px); }
-      12% { transform: translateX(-120.0px); }
-      16% { transform: translateX(-100.0px); }
-      20% { transform: translateX(-78.0px); }
-      24% { transform: translateX(-40.0px); }
-      28% { transform: translateX(-2.0px); }
-      90% { transform: translateX(-2.0px); }
-      95% { transform: translateX(-180px); }
-      100% { transform: translateX(-180px); }
-    }
+    <!-- @keyframes slideSteps { -->
+      <!-- 0% { transform: translateX(-180px); } -->
+      <!-- 5% { transform: translateX(-160px); } -->
+      <!-- 8.5% { transform: translateX(-140px); } -->
+      <!-- 12% { transform: translateX(-120.0px); } -->
+      <!-- 16% { transform: translateX(-100.0px); } -->
+      <!-- 20% { transform: translateX(-78.0px); } -->
+      <!-- 24% { transform: translateX(-40.0px); } -->
+      <!-- 28% { transform: translateX(-2.0px); } -->
+      <!-- 90% { transform: translateX(-2.0px); } -->
+      <!-- 95% { transform: translateX(-180px); } -->
+      <!-- 100% { transform: translateX(-180px); } -->
+    <!-- } -->
 
-    #right-bracket {
-      animation: slideSteps 9.9s infinite;
-    }
+    <!-- #right-bracket { -->
+      <!-- animation: slideSteps 9.9s infinite; -->
+    <!-- } -->
   </style>
 
   <!-- Left Bracket -->
-  <path id="left-bracket" d="M0,47.52L0,0L13.44,0L13.44,5.1L5.76,5.1L5.76,42.48L13.44,42.48L13.44,47.52L0,47.52Z" style="fill:#2b2533;fill-rule:nonzero;opacity:1;"/>
+  <path id="left-bracket" d="M0,47.52L0,0L13.44,0L13.44,5.1L5.76,5.1L5.76,42.48L13.44,42.48L13.44,47.52L0,47.52Z" style="fill:#2b2533;fill-rule:nonzero;opacity:1;">
+
+  </path>
 
   <path d="M40.66,40.56C38.68,40.56 36.94,40.02 35.32,39.06C33.7,38.1 32.44,36.72 31.48,35.04C30.58,33.3 30.1,31.38 30.1,29.28C30.1,27.3 30.52,25.44 31.3,23.64C32.08,21.9 33.16,20.28 34.54,18.96C35.92,17.58 37.48,16.44 39.22,15.66C40.96,14.88 42.76,14.52 44.62,14.52C46.3,14.52 47.86,14.82 49.3,15.42C50.8,16.08 52,16.98 53.02,18.12L53.74,15L59.5,15L53.26,40.02L47.56,40.02L48.16,37.62C47.14,38.46 46,39.18 44.74,39.72C43.48,40.26 42.1,40.56 40.66,40.56ZM42.46,34.74C43.9,34.74 45.22,34.38 46.42,33.6C47.62,32.82 48.58,31.8 49.3,30.6C50.02,29.34 50.38,28.02 50.38,26.64C50.38,25.44 50.14,24.36 49.6,23.46C49.06,22.5 48.34,21.72 47.44,21.18C46.54,20.64 45.46,20.34 44.2,20.34C42.82,20.34 41.5,20.7 40.3,21.48C39.1,22.26 38.14,23.22 37.42,24.48C36.7,25.68 36.34,27 36.34,28.44C36.34,29.58 36.58,30.6 37.12,31.56C37.6,32.52 38.32,33.3 39.28,33.9C40.24,34.44 41.26,34.74 42.46,34.74Z" style="fill:#2b2533;fill-rule:nonzero;opacity:1;">
     <animate id="fadeIna"
@@ -165,5 +167,34 @@
   <!-- Right Bracket -->
     <path id="right-bracket" d="M243.756,47.52L243.756,42.48L251.436,42.48L251.436,5.1L243.756,5.1L243.756,0L257.196,0L257.196,47.52L243.756,47.52Z" style="fill:#2b2533;fill-rule:nonzero;opacity:1;">
 
+    <animateTransform id="m1" attributeName="transform" type="translate" from="-180,0" to="-160,0" dur="0.32s" begin="0s; m16.end" />
+    <animateTransform id="m2" attributeName="transform" type="translate" from="-160,0" to="-160,0" dur="0.08s" begin="m1.end" />
+
+    <animateTransform id="m3" attributeName="transform" type="translate" from="-160,0" to="-140,0" dur="0.32s" begin="m2.end" />
+    <animateTransform id="m4" attributeName="transform" type="translate" from="-140,0" to="-140,0" dur="0.08s" begin="m3.end" />
+
+    <animateTransform id="m5" attributeName="transform" type="translate" from="-140,0" to="-120,0" dur="0.32s" begin="m4.end" />
+    <animateTransform id="m6" attributeName="transform" type="translate" from="-120,0" to="-120,0" dur="0.08s" begin="m5.end" />
+
+    <animateTransform id="m7" attributeName="transform" type="translate" from="-120,0" to="-100,0" dur="0.32s" begin="m6.end" />
+    <animateTransform id="m8" attributeName="transform" type="translate" from="-100,0" to="-100,0" dur="0.08s" begin="m7.end" />
+
+    <animateTransform id="m9" attributeName="transform" type="translate" from="-100,0" to="-78,0" dur="0.32s" begin="m8.end" />
+    <animateTransform id="m10" attributeName="transform" type="translate" from="-78,0" to="-78,0" dur="0.08s" begin="m9.end" />
+
+    <animateTransform id="m11" attributeName="transform" type="translate" from="-78,0" to="-40,0" dur="0.32s" begin="m10.end" />
+    <animateTransform id="m12" attributeName="transform" type="translate" from="-40,0" to="-40,0" dur="0.08s" begin="m11.end" />
+
+    <animateTransform id="m13" attributeName="transform" type="translate" from="-40,0" to="-2,0" dur="0.5s" begin="m12.end" />
+
+    <animateTransform id="m14" attributeName="transform" type="translate" from="-2,0" to="-2,0" dur="5.7s" begin="m13.end" />
+    <animateTransform id="m15" attributeName="transform" type="translate" from="-2,0" to="-180,0" dur="0.3s" begin="m14.end" />
+    <animateTransform id="m16" attributeName="transform" type="translate" from="-180,0" to="-180,0" dur="0.9s" begin="m15.end" />
+
     </path>
+
+      <!-- keyTimes="0; 0.05; 0.085; 0.12; 0.16; 0.2; 0.24; 0.28; 0.9; 0.95; 1" -->
+      <!-- values="-180,0; -160,0; -140,0; -120,0; -100,0;  -78,0; -40,0; -2,0; -2,0; -180,0; -180,0" -->
+<!-- values="-180,0; -160,0; -140,0; -120,0; -100,0; -78,0; -40,0; -2,0; -2,0; -180,0; -180,0" -->
+      <!-- keyTimes="0; 0.1; 0.185; 0.26; 0.35; 0.45; 0.55; 0.65; 0.9; 0.95; 1" -->
 </svg>
