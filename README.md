@@ -1,5 +1,14 @@
 <img src="src/ims/arrcomp_anim.svg" width="600">
 
+[![Crates.io][crates-badge]][crates-url]
+![docs.rs](https://img.shields.io/docsrs/arrcomp)
+[![BSD-3 licensed][bsd-badge]][bsd-url]
+
+[crates-badge]: https://img.shields.io/crates/v/arrcomp.svg
+[crates-url]: https://crates.io/crates/arrcomp
+[bsd-badge]: https://img.shields.io/badge/license-BSD3-blue.svg
+[bsd-url]: https://github.com/janbridley/arrcomp/blob/main/LICENSE
+
 Python-style list comprehension syntax for contiguous memory Rust arrays.
 
 In contrast to most Rust packages of this sort, arrcomp exclusively creates fixed size
