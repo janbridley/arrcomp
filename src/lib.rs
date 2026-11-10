@@ -15,10 +15,10 @@ Vector-based approaches, but places a few additional restrictions on the allowed
 use arrcomp::arr;
 
 # fn main() {
-let incremented = arr![x + 1, for x in 0..10; len 10];
+let incremented = arr![x + 1, for x in 0..10];
 // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-let incremented_if_odd = arr![x + 1, for x in 0..10, if x % 2 == 1; len 10];
+let incremented_if_odd = arr![x + 1, for x in 0..10, if x % 2 == 1];
 // [None, Some(2), None, Some(4), None, Some(6), None, Some(8), None, Some(10)]
 # }
 ```
@@ -27,10 +27,15 @@ modifying fixed-size arrays. `Option` types allow the use of filters even in cas
 the number of unfiltered outputs is unknown at compile time -- without any dynamic
 allocations!
 
-The `arr!` pattern is generally expressed as `f(x), for x in iterable, if condition; len N`,
-where `f(x)` and `iterable` are any [statement](https://doc.rust-lang.org/reference/statements.html),
-`condition` is any statement that evaluates to a `bool`, and and `x` is any [pattern](https://doc.rust-lang.org/reference/patterns.html). Unlike Python, we must also provide a const `N` matching
-the length of the provided iterable in order to ensure the output can be sized at compile time.
+The `arr!` pattern is generally expressed as `f(x), for x in iterable, if condition`, where
+`f(x)` and `iterable` are any [statement](https://doc.rust-lang.org/reference/statements.html),
+`condition` is any statement that evaluates to a `bool`, and `x` is any [pattern](https://doc.rust-lang.org/reference/patterns.html).
+The output length is inferred at compile time whenever it is statically knowable: constant
+ranges (`0..10`, `5..12`, `0..=9`, `0..N`), and any iterable
+whose type carries its length (arrays and most iterators built from them, see [`KnownLength`]).
+Iterables whose length is only known at runtime (`0..n` for a runtime `n`, `Vec`s, slice
+iterators, `filter`/`chain`/`flatten` adapters) instead take a const `N` after a semicolon:
+`arr![x + 1, for x in 0..n; len 10]`.
 
 <div class="warning">
 Note that the extended <code>arr![f(x), for x in a, for a in b, ... for c in iterable]</code>
@@ -99,20 +104,94 @@ assert_eq!(arr_comprehension.to_vec(), incremented_vec.collect::<Vec<_>>());
 */
 
 /**
-The `arr!` macro has two branches - one for filtered comprehensions and one for
-unfiltered. This distinction allows unfiltered comprehensions to return arrays of a base
-type rather `Option<type>`, simplifying cases where all values would be `Some`
+Marker trait for iterables whose exact element count `N` is known at compile time.
 
-`arr![$ex, for $x in $input, if $cond0, if $cond1; len $len]`
+Because a given type implements `KnownLength<N>` for exactly one `N`, the compiler can
+*infer* the const generic from the iterable's type alone, allowing users to omit `len`.
+
+Implementations are provided for `[T; N]`, `std::array::IntoIter<T, N>`, `std::iter::Empty`
+(length 0), `std::iter::Once` (length 1), and the length-preserving iterator adapters
+`map`, `zip` (both sides must have equal length), `enumerate`, `rev`, `copied`, `cloned`,
+`fuse`, and `peekable`.
+
+Most iterators do *not* have a statically known length: ranges over runtime bounds (`0..n`),
+`Vec`s and slice iterators, `filter`/`chain`/`flatten`/`take`/`skip`, and anything built on
+I/O. Feed those to [`arr!`](crate::arr) with an explicit `; len N` instead. Constant-bounded
+ranges (`0..10`, `0..N`) are sized them directly from their bounds:
+
+```rust,compile_fail
+use arrcomp::arr;
+
+# fn main() {
+// `n` is a runtime value, so `0..n` has no compile-time length
+let n = 10;
+let range_comprehension = arr![x + 1, for x in 0..n];
+# }
+```
+**/
+pub trait KnownLength<const N: usize> {}
+
+impl<T, const N: usize> KnownLength<N> for [T; N] {}
+impl<T, const N: usize> KnownLength<N> for std::array::IntoIter<T, N> {}
+impl<T> KnownLength<0> for std::iter::Empty<T> {}
+impl<T> KnownLength<1> for std::iter::Once<T> {}
+
+impl<I, F, const N: usize> KnownLength<N> for std::iter::Map<I, F> where I: KnownLength<N> {}
+impl<A, B, const N: usize> KnownLength<N> for std::iter::Zip<A, B>
+where
+    A: KnownLength<N>,
+    B: KnownLength<N>,
+{
+}
+impl<I, const N: usize> KnownLength<N> for std::iter::Enumerate<I> where I: KnownLength<N> {}
+impl<I, const N: usize> KnownLength<N> for std::iter::Rev<I> where I: KnownLength<N> {}
+impl<I, const N: usize> KnownLength<N> for std::iter::Copied<I> where I: KnownLength<N> {}
+impl<I, const N: usize> KnownLength<N> for std::iter::Cloned<I> where I: KnownLength<N> {}
+impl<I, const N: usize> KnownLength<N> for std::iter::Fuse<I> where I: KnownLength<N> {}
+impl<I, const N: usize> KnownLength<N> for std::iter::Peekable<I> where I: Iterator + KnownLength<N> {}
+
+// Support function for the `arr!` macro's inferred-length branches. It exists because
+// only a generic function can have a const generic *inferred* from a trait bound: with
+// `I: KnownLength<N>`, the sole `N` satisfied by the iterable's type becomes the array
+// length. It must remain `pub` -- the exported macro calls it as `$crate::collect_array`
+// inside downstream crates -- but it is an implementation detail, so it is hidden from
+// the documentation. `f` is the macro-built per-element closure: it binds the `for`
+// pattern and evaluates the comprehension expression (wrapped in `Option` for filtered
+// comprehensions). Short iterators fall back to `Default` values for the remaining
+// slots, which cannot happen for a correctly implemented `KnownLength`.
+#[doc(hidden)]
+pub fn collect_array<I, T, F, const N: usize>(iter: I, mut f: F) -> [T; N]
+where
+    I: IntoIterator + KnownLength<N>,
+    I::Item: Default,
+    F: FnMut(I::Item) -> T,
+{
+    let mut iter = iter.into_iter();
+
+    std::array::from_fn(|_| f(iter.next().unwrap_or_default()))
+}
+
+/**
+The `arr!` macro has three length modes -- inferred from a constant-bounded range, inferred
+from the iterable's type via `KnownLength`, or explicit `; len` -- each with filtered and
+unfiltered branches.
+
+Ranges of the form `0..$bound` are sized directly from the bound, which works even when the
+bound is a const generic parameter: `arr![x, for x in 0..N]` inside `fn f<const N: usize>()`.
+Other constant bounds (`5..12`, `0..=9`) are sized by const arithmetic on the bounds.
+
+`arr![$ex, for $x in 0..$bound]`
+`arr![$ex, for $x in $lo..$hi]`
+`arr![$ex, for $x in $input]`
+`arr![$ex, for $x in $input; len $len]`
 **/
 #[macro_export]
 macro_rules! arr {
     ($ex:stmt, for $x:pat in $input:expr $(, if $cond:expr)+; len $len:expr) => {{
         let mut iter = $input.into_iter();
 
-        if $input.len() != $len {
-            let msg = &format!("Expected {} elements, got {}.", $len, $input.len());
-            panic!("{}", msg);
+        if iter.len() != $len {
+            panic!("Expected {} elements, got {}.", $len, iter.len());
         }
         std::array::from_fn::<_, $len, _>(|_| {
             let $x = iter.next().unwrap_or_default();
@@ -124,9 +203,8 @@ macro_rules! arr {
     ($ex:stmt, for $x:pat in $input:expr; len $len:expr) => {{
         let mut iter = $input.into_iter();
 
-        if $input.len() != $len {
-            let msg = &format!("Expected {} elements, got {}.", $len, $input.len());
-            panic!("{}", msg);
+        if iter.len() != $len {
+            panic!("Expected {} elements, got {}.", $len, iter.len());
         }
 
         std::array::from_fn::<_, $len, _>(|_| {
@@ -135,6 +213,72 @@ macro_rules! arr {
         })
     }};
 
+    // `0..bound`: the length *is* the bound, so it can be passed as a standalone const
+    // argument. This is the only form that supports const generic bounds (`0..N`).
+    ($ex:stmt, for $x:pat in 0 .. $hi:tt $(, if $cond:expr)+) => {{
+        let mut iter = (0..$hi).into_iter();
+
+        std::array::from_fn::<_, $hi, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            (true $(&& $cond)*).then(|| {$ex})
+        })
+    }};
+
+    ($ex:stmt, for $x:pat in 0 .. $hi:tt) => {{
+        let mut iter = (0..$hi).into_iter();
+
+        std::array::from_fn::<_, $hi, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            $ex
+        })
+    }};
+
+    // constant bounds with a non-zero start (or an inclusive end) require const
+    // arithmetic, which excludes const generic bounds: use `; len` for those.
+    ($ex:stmt, for $x:pat in $lo:tt ..= $hi:tt $(, if $cond:expr)+) => {{
+        let mut iter = ($lo..=$hi).into_iter();
+
+        std::array::from_fn::<_, { ($hi) - ($lo) + 1 }, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            (true $(&& $cond)*).then(|| {$ex})
+        })
+    }};
+
+    ($ex:stmt, for $x:pat in $lo:tt ..= $hi:tt) => {{
+        let mut iter = ($lo..=$hi).into_iter();
+
+        std::array::from_fn::<_, { ($hi) - ($lo) + 1 }, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            $ex
+        })
+    }};
+
+    ($ex:stmt, for $x:pat in $lo:tt .. $hi:tt $(, if $cond:expr)+) => {{
+        let mut iter = ($lo..$hi).into_iter();
+
+        std::array::from_fn::<_, { ($hi) - ($lo) }, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            (true $(&& $cond)*).then(|| {$ex})
+        })
+    }};
+
+    ($ex:stmt, for $x:pat in $lo:tt .. $hi:tt) => {{
+        let mut iter = ($lo..$hi).into_iter();
+
+        std::array::from_fn::<_, { ($hi) - ($lo) }, _>(|_| {
+            let $x = iter.next().unwrap_or_default();
+            $ex
+        })
+    }};
+
+    // any iterable whose type carries its length: see `KnownLength`
+    ($ex:stmt, for $x:pat in $input:expr $(, if $cond:expr)+) => {{
+        $crate::collect_array($input, |$x| {(true $(&& $cond)*).then(|| {$ex})})
+    }};
+
+    ($ex:stmt, for $x:pat in $input:expr) => {{
+        $crate::collect_array($input, |$x| {$ex})
+    }};
 }
 
 #[cfg(test)]
@@ -395,6 +539,153 @@ mod tests {
                 if x > z; len 5
             ],
             arr![y, for (x, y) in pairs, if x as f64 > y + 1.0; len 5]
+        );
+    }
+
+    /*
+        Length inference, part one: constant-bounded ranges.
+    */
+
+    #[rstest]
+    fn test_range_from_literals() {
+        assert_eq!(arr![x + 1, for x in 0..10], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        assert_eq!(arr![x, for x in 5..12], [5, 6, 7, 8, 9, 10, 11]);
+        assert_eq!(arr![x, for x in 0..=9], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
+    #[rstest]
+    fn test_range_empty() {
+        let empty: [i32; 0] = arr![x, for x in 0..0];
+        assert_eq!(empty, []);
+    }
+
+    #[rstest]
+    fn test_range_with_cond() {
+        assert_eq!(
+            arr![x + 1, for x in 0..10, if x % 2 == 1],
+            [
+                None,
+                Some(2),
+                None,
+                Some(4),
+                None,
+                Some(6),
+                None,
+                Some(8),
+                None,
+                Some(10)
+            ]
+        );
+    }
+
+    #[rstest]
+    fn test_range_const_bound() {
+        const LIMIT: usize = 4;
+        assert_eq!(arr![x, for x in 0..LIMIT], [0, 1, 2, 3]);
+        assert_eq!(arr![x, for x in 1..LIMIT], [1, 2, 3]);
+    }
+
+    fn doubled<const N: usize>() -> [usize; N] {
+        arr![x * 2, for x in 0..N]
+    }
+
+    #[rstest]
+    fn test_range_const_generic_bound() {
+        assert_eq!(doubled::<5>(), [0, 2, 4, 6, 8]);
+        assert_eq!(doubled::<0>(), []);
+    }
+
+    /*
+        Length inference, part two: iterables whose *type* carries its length
+    */
+
+    #[rstest]
+    fn test_inferred_identity(nums: [i32; 5]) {
+        assert_eq!(arr![x, for x in nums], nums);
+    }
+
+    #[rstest]
+    fn test_inferred_incremented(nums: [i32; 5], nums_plus_one: [i32; 5]) {
+        assert_eq!(arr![x + 1, for x in nums], nums_plus_one);
+    }
+
+    #[rstest]
+    fn test_inferred_with_cond(nums: [i32; 5]) {
+        assert_eq!(
+            arr![x, for x in nums, if x % 2 == 0],
+            nums.map(|x| if x % 2 == 0 { Some(x) } else { None })
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_array_literal() {
+        assert_eq!(arr![x * 2, for x in [1, 2, 3]], [2, 4, 6]);
+    }
+
+    #[rstest]
+    fn test_inferred_nested(pairs: [(i32, f64); 5]) {
+        assert_eq!(
+            vec![arr![arr![y, for (_, _, y) in [(1, 33, x)]], for (x, _) in pairs]],
+            vec![pairs.map(|p| [p.0])]
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_map_adapter(nums: [i32; 5]) {
+        assert_eq!(
+            arr![x + 1, for x in nums.into_iter().map(|v| v * 2)],
+            nums.map(|v| v * 2 + 1)
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_zip_adapter(pairs: [(i32, f64); 5], nums_plus_one: [i32; 5]) {
+        assert_eq!(
+            arr![(x * z) as f64, for ((x, _), z) in pairs.into_iter().zip(nums_plus_one)],
+            arr![y, for (_, y) in pairs]
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_adapter_chain(nums: [i32; 5]) {
+        assert_eq!(
+            arr![x, for x in nums.into_iter().enumerate().map(|(i, v)| i as i32 + v).rev()],
+            [13, 8, 0, 100, 0]
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_copied() {
+        assert_eq!(
+            arr![x + 1, for x in [&1, &2, &3].into_iter().copied()],
+            [2, 3, 4]
+        );
+    }
+
+    #[rstest]
+    fn test_inferred_once_and_empty() {
+        assert_eq!(arr![x + 1, for x in std::iter::once(41)], [42]);
+        assert_eq!(arr![x, for x in std::iter::empty::<i32>()], []);
+    }
+
+    #[rstest]
+    fn test_non_copy_elements() {
+        let words = [String::from("hello"), String::from("arrcomp")];
+        assert_eq!(arr![w.len(), for w in words], [5, 7]);
+    }
+
+    #[rstest]
+    fn test_non_copy_elements_with_len() {
+        let words = [String::from("hello"), String::from("arrcomp")];
+        assert_eq!(arr![w.len(), for w in words; len 2], [5, 7]);
+    }
+
+    #[rstest]
+    fn test_collect_array_direct(nums: [i32; 5], nums_plus_one: [i32; 5]) {
+        assert_eq!(collect_array(nums, |x| x + 1), nums_plus_one);
+        assert_eq!(
+            collect_array(nums.into_iter().map(|v| v * 2), |x| x - 1),
+            nums.map(|v| v * 2 - 1)
         );
     }
 }

@@ -15,31 +15,40 @@ In contrast to most Rust packages of this sort, arrcomp exclusively creates fixe
 arrays without an intermediate heap allocation. This is more performant than standard
 Vector-based approaches, but places a few additional restrictions on the allowed syntax.
 
-`arrcomp` Syntax
-----------------
+## `arrcomp` Syntax
 
 ```rust
 use arrcomp::arr;
 
-let incremented = arr![x + 1, for x in 0..10; len 10];
+let incremented = arr![x + 1, for x in 0..10];
 // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-let incremented_if_odd = arr![x + 1, for x in 0..10, if x % 2 == 1; len 10];
+let incremented_if_odd = arr![x + 1, for x in 0..10, if x % 2 == 1];
 // [None, Some(2), None, Some(4), None, Some(6), None, Some(8), None, Some(10)]
 ```
 
 This Rust adaption provides a familiar and performant interface for creating and
 modifying fixed-size arrays. `Option` types allow the use of filters even in cases where
-the number of unfiltered outputs is unknown at compile time -- without any dynamic
+the number of unfiltered outputs is unknown at compile time: without any dynamic
 allocations!
 
-The `arr!` pattern is generally expressed as `f(x), for x in iterable, if condition; len N`,
-where `f(x)` and `iterable` are any [statement](https://doc.rust-lang.org/reference/statements.html),
-`condition` is any statement that evaluates to a `bool`, and and `x` is any [pattern](https://doc.rust-lang.org/reference/patterns.html). Unlike Python, we must also provide a const `N` matching
-the length of the provided iterable in order to ensure the output can be sized at compile time.
+The `arr!` pattern is generally expressed as `f(x), for x in iterable, if condition`,
+where `f(x)` and `iterable` are any
+[statement](https://doc.rust-lang.org/reference/statements.html), `condition` is any
+statement that evaluates to a `bool`, and `x` is any
+[pattern](https://doc.rust-lang.org/reference/patterns.html). The output length is
+inferred at compile time whenever it is statically knowable:
 
-Why this crate?
-===============
+- constant ranges: `0..10`, `5..12`, `0..=9`, and `0..N` -- including const generic `N`,
+  so `arr![x, for x in 0..N]` works inside `fn f<const N: usize>()`
+- arrays and most iterators built from them (`map`, `zip`, `enumerate`, `rev`, `copied`,
+  ...), via the `KnownLength` trait
+
+Iterables whose length is only known at runtime (`0..n` for a runtime `n`, `Vec`s, slice
+iterators, `filter`/`chain`/`flatten` adapters) take a const `N` after a semicolon
+instead: `arr![x + 1, for x in 0..n; len 10]`.
+
+# Why this crate?
 
 When working with vectors, list comprehensions are most naturally expressed as
 `filter/flat_map`s in Rust. Consider the following example, which uses `filter` and
@@ -83,6 +92,6 @@ simplified syntax that allows for arbitrary expressions for our input iterable.
 ```rust
 let incremented_vec = (0..10).map(|x| if x % 2 == 1 { Some(x+1) } else { None });
 
-let arr_comprehension = arr![x+1, for x in 0..10, if x % 2 == 1; len 10];
+let arr_comprehension = arr![x+1, for x in 0..10, if x % 2 == 1];
 assert_eq!(arr_comprehension.to_vec(), incremented_vec.collect::<Vec<_>>());
 ```
