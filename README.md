@@ -20,11 +20,14 @@ Vector-based approaches, but places a few additional restrictions on the allowed
 ```rust
 use arrcomp::arr;
 
-let incremented = arr![x + 1, for x in 0..10];
-// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+let incremented: [i32; 10] = arr![x + 1, for x in 0..10];
+assert_eq!(incremented, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-let incremented_if_odd = arr![x + 1, for x in 0..10, if x % 2 == 1];
-// [None, Some(2), None, Some(4), None, Some(6), None, Some(8), None, Some(10)]
+let incremented_if_odd: [Option<i32>; 10] = arr![x + 1, for x in 0..10, if x % 2 == 1];
+assert_eq!(
+    incremented_if_odd,
+    [None, Some(2), None, Some(4), None, Some(6), None, Some(8), None, Some(10)]
+);
 ```
 
 This Rust adaption provides a familiar and performant interface for creating and
@@ -51,11 +54,11 @@ iterable and conditions able to reference the bindings of all previous clauses:
 ```rust
 use arrcomp::arr;
 
-let products = arr![x * 10 + y, for x in 0..2, for y in 0..3];
-// [0, 1, 2, 10, 11, 12]
+let products: [i32; 6] = arr![x * 10 + y, for x in 0..2, for y in 0..3];
+assert_eq!(products, [0, 1, 2, 10, 11, 12]);
 
-let evens_only = arr![x * y, for x in 1..3, if x % 2 == 0, for y in 0..2];
-// [Some(0), Some(2), None, None]
+let evens_only: [Option<i32>; 4] = arr![x * y, for x in 1..3, if x % 2 == 0, for y in 0..2];
+assert_eq!(evens_only, [Some(0), Some(2), None, None]);
 ```
 
 The output length is the product of the clause lengths, inferred whenever every clause is
@@ -89,11 +92,11 @@ Rust statement, so it can bind named intermediates inside a block:
 ```rust
 use arrcomp::arr;
 
-let hypotenuses = arr![
+let hypotenuses: [f64; 3] = arr![
     { let sq = x * x + y * y; (sq as f64).sqrt() },
     for (x, y) in [(3.0, 4.0), (5.0, 12.0), (8.0, 15.0)]
 ];
-// [5.0, 13.0, 17.0]
+assert_eq!(hypotenuses, [5.0, 13.0, 17.0]);
 ```
 
 The body is an `FnMut` closure, so mutable outer bindings are updated as elements are
@@ -103,8 +106,8 @@ produced. This allows for cumulative sums, for example:
 use arrcomp::arr;
 
 let mut total = 0;
-let cumulative = arr![{ total += x; total }, for x in [1, 2, 3, 4]];
-// [1, 3, 6, 10]
+let cumulative: [i32; 4] = arr![{ total += x; total }, for x in [1, 2, 3, 4]];
+assert_eq!(cumulative, [1, 3, 6, 10]);
 ```
 
 Inner clauses see every binding of the outer clauses, so an inner iterable's bounds may
@@ -114,8 +117,8 @@ depend on the outer value. Here the dependent inner ranges yield exactly
 ```rust
 use arrcomp::arr;
 
-let triangle = arr![y, for x in 0..4, for y in 0..x; len 6];
-// [0, 0, 1, 0, 1, 2]
+let triangle: [i32; 6] = arr![y, for x in 0..4, for y in 0..x; len 6];
+assert_eq!(triangle, [0, 0, 1, 0, 1, 2]);
 ```
 
 Mutable bindings do not carry *into* multiple-`for` clauses: each inner clause captures
@@ -127,12 +130,12 @@ use arrcomp::arr;
 
 let next = std::cell::Cell::new(0);
 let id = &next;
-let labelled = arr![
+let labelled: [(i32, i32); 6] = arr![
     { id.set(id.get() + 1); (id.get(), x * 10 + y) },
     for x in 0..2,
     for y in 0..3
 ];
-// [(1, 0), (2, 1), (3, 2), (4, 10), (5, 11), (6, 12)]
+assert_eq!(labelled, [(1, 0), (2, 1), (3, 2), (4, 10), (5, 11), (6, 12)]);
 ```
 
 # Why this crate?
