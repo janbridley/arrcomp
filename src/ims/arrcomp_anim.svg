@@ -8,7 +8,7 @@
     <animate id="fadeIna"
              attributeName="opacity"
              from="0" to="1" dur="0.4s"
-             begin="0s;holdOff.end" />
+             begin="0s;holdOffa.end" />
     <animate id="holdOna"
              attributeName="opacity"
              from="1" to="1" dur="8s"
@@ -17,7 +17,7 @@
              attributeName="opacity"
              from="1" to="0" dur="0.1s"
              begin="holdOna.end" />
-    <animate id="holdOff"
+    <animate id="holdOffa"
              attributeName="opacity"
              from="0" to="0" dur="1.4s"
              begin="fadeOuta.end" />
@@ -29,7 +29,7 @@
     <animate id="fadeInr"
              attributeName="opacity"
              from="0" to="1" dur="0.4s"
-             begin="0.4s;holdOff.end+0.4s" />
+             begin="0.4s;holdOffr.end+0.4s" />
     <animate id="holdOnr"
              attributeName="opacity"
              from="1" to="1" dur="7.6s"
@@ -38,7 +38,7 @@
              attributeName="opacity"
              from="1" to="0" dur="0.1s"
              begin="holdOnr.end" />
-    <animate id="holdOff"
+    <animate id="holdOffr"
              attributeName="opacity"
              from="0" to="0" dur="1.4s"
              begin="fadeOutr.end" />
@@ -49,7 +49,7 @@
     <animate id="fadeInrr"
              attributeName="opacity"
              from="0" to="1" dur="0.4s"
-             begin="0.8s;holdOff.end+0.8s" />
+             begin="0.8s;holdOffrr.end+0.8s" />
     <animate id="holdOnrr"
              attributeName="opacity"
              from="1" to="1" dur="7.2s"
@@ -58,7 +58,7 @@
              attributeName="opacity"
              from="1" to="0" dur="0.1s"
              begin="holdOnrr.end" />
-    <animate id="holdOff"
+    <animate id="holdOffrr"
              attributeName="opacity"
              from="0" to="0" dur="1.4s"
              begin="fadeOutrr.end" />
@@ -146,29 +146,29 @@
   <!-- Right Bracket -->
     <path id="right-bracket" d="M243.756,47.52L243.756,42.48L251.436,42.48L251.436,5.1L243.756,5.1L243.756,0L257.196,0L257.196,47.52L243.756,47.52Z" style="fill:#2b2533;fill-rule:nonzero;opacity:1;">
 
-    <animateTransform id="m1" attributeName="transform" type="translate" from="-180,0" to="-160,0" dur="0.32s" begin="0s; m16.end" />
-    <animateTransform id="m2" attributeName="transform" type="translate" from="-160,0" to="-160,0" dur="0.08s" begin="m1.end" />
+    <animateTransform id="m1" attributeName="transform" type="translate" from="-180,0" to="-167.596,0" dur="0.32s" begin="0s; m16.end" />
+    <animateTransform id="m2" attributeName="transform" type="translate" from="-167.596,0" to="-167.596,0" dur="0.08s" begin="m1.end" />
 
-    <animateTransform id="m3" attributeName="transform" type="translate" from="-160,0" to="-140,0" dur="0.32s" begin="m2.end" />
-    <animateTransform id="m4" attributeName="transform" type="translate" from="-140,0" to="-140,0" dur="0.08s" begin="m3.end" />
+    <animateTransform id="m3" attributeName="transform" type="translate" from="-167.596,0" to="-147.415,0" dur="0.32s" begin="m2.end" />
+    <animateTransform id="m4" attributeName="transform" type="translate" from="-147.415,0" to="-147.415,0" dur="0.08s" begin="m3.end" />
 
-    <animateTransform id="m5" attributeName="transform" type="translate" from="-140,0" to="-120,0" dur="0.32s" begin="m4.end" />
-    <animateTransform id="m6" attributeName="transform" type="translate" from="-120,0" to="-120,0" dur="0.08s" begin="m5.end" />
+    <animateTransform id="m5" attributeName="transform" type="translate" from="-147.415,0" to="-128.352,0" dur="0.32s" begin="m4.end" />
+    <animateTransform id="m6" attributeName="transform" type="translate" from="-128.352,0" to="-128.352,0" dur="0.08s" begin="m5.end" />
 
-    <animateTransform id="m7" attributeName="transform" type="translate" from="-120,0" to="-100,0" dur="0.32s" begin="m6.end" />
-    <animateTransform id="m8" attributeName="transform" type="translate" from="-100,0" to="-100,0" dur="0.08s" begin="m7.end" />
+    <animateTransform id="m7" attributeName="transform" type="translate" from="-128.352,0" to="-104.903,0" dur="0.32s" begin="m6.end" />
+    <animateTransform id="m8" attributeName="transform" type="translate" from="-104.903,0" to="-104.903,0" dur="0.08s" begin="m7.end" />
 
-    <animateTransform id="m9" attributeName="transform" type="translate" from="-100,0" to="-78,0" dur="0.32s" begin="m8.end" />
-    <animateTransform id="m10" attributeName="transform" type="translate" from="-78,0" to="-78,0" dur="0.08s" begin="m9.end" />
+    <animateTransform id="m9" attributeName="transform" type="translate" from="-104.903,0" to="-76.53,0" dur="0.32s" begin="m8.end" />
+    <animateTransform id="m10" attributeName="transform" type="translate" from="-76.53,0" to="-76.53,0" dur="0.08s" begin="m9.end" />
 
-    <animateTransform id="m11" attributeName="transform" type="translate" from="-78,0" to="-40,0" dur="0.32s" begin="m10.end" />
-    <animateTransform id="m12" attributeName="transform" type="translate" from="-40,0" to="-40,0" dur="0.08s" begin="m11.end" />
+    <animateTransform id="m11" attributeName="transform" type="translate" from="-76.53,0" to="-31.039,0" dur="0.32s" begin="m10.end" />
+    <animateTransform id="m12" attributeName="transform" type="translate" from="-31.039,0" to="-31.039,0" dur="0.08s" begin="m11.end" />
 
-    <animateTransform id="m13" attributeName="transform" type="translate" from="-40,0" to="-2,0" dur="0.5s" begin="m12.end" />
+    <animateTransform id="m13" attributeName="transform" type="translate" from="-31.039,0" to="-0.07,0" dur="0.5s" begin="m12.end" />
 
-    <animateTransform id="m14" attributeName="transform" type="translate" from="-2,0" to="-2,0" dur="5.7s" begin="m13.end" />
-    <animateTransform id="m15" attributeName="transform" type="translate" from="-2,0" to="-180,0" dur="0.3s" begin="m14.end" />
-    <animateTransform id="m16" attributeName="transform" type="translate" from="-180,0" to="-180,0" dur="0.9s" begin="m15.end" />
+    <animateTransform id="m14" attributeName="transform" type="translate" from="-0.07,0" to="-0.07,0" dur="5.7s" begin="m13.end" />
+    <animateTransform id="m15" attributeName="transform" type="translate" from="-0.07,0" to="-180,0" dur="0.3s" begin="m14.end" />
+    <animateTransform id="m16" attributeName="transform" type="translate" from="-180,0" to="-180,0" dur="1.0s" begin="m15.end" />
 
     </path>
 </svg>
